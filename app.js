@@ -42,23 +42,40 @@ function pickLoose(obj, patterns) {
   }
   return "";
 }
+
 function driveToDirect(url) {
   const u = String(url || "").trim();
   if (!u) return "";
 
-  // file/d/ID/view
+  // drive.google.com/file/d/ID/view
   let m = u.match(/drive\.google\.com\/file\/d\/([^/]+)/);
   if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
 
-  // open?id=ID
+  // drive.google.com/open?id=ID
   m = u.match(/drive\.google\.com\/open\?id=([^&]+)/);
   if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
 
-  // uc?id=ID o uc?export=...
+  // ya es uc
   if (u.includes("drive.google.com/uc")) return u;
 
-  return u; // si no es Drive, lo dejamos tal cual
+  return u; // otras URLs se quedan igual
 }
+
+function getImagesFromRow(o) {
+  // 1) Si el API ya trae o.imagenes, lo usamos
+  if (Array.isArray(o.imagenes) && o.imagenes.length) {
+    return o.imagenes.map(driveToDirect).filter(Boolean);
+  }
+
+  // 2) Si no, intentamos buscar una columna tipo "Enlaces a fotografías"
+  const key = Object.keys(o).find(k => k.trim().toLowerCase().includes("fotograf"));
+  const raw = key ? String(o[key] || "") : "";
+  return raw
+    .split(",")
+    .map(s => driveToDirect(s.trim()))
+    .filter(Boolean);
+}
+
 
 
 function card(o) {
@@ -165,6 +182,7 @@ elSolo.addEventListener("change", applyFilters);
 elRefresh.addEventListener("click", () => load().catch(err => elStatus.textContent = err.message));
 
 load().catch(err => elStatus.textContent = err.message);
+
 
 
 
