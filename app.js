@@ -20,29 +20,42 @@ function fmtPrice(p, moneda = "EUR") {
   }).format(n);
 }
 
-/* Convierte enlaces de Google Drive a enlace directo */
-function driveToDirect(url) {
+/* Extrae ID de Drive si existe */
+function extractDriveId(url) {
   const u = String(url || "").trim();
   if (!u) return "";
 
-  // Captura el ID de Drive desde varios formatos
   const m =
     u.match(/drive\.google\.com\/file\/d\/([^/]+)/) ||
     u.match(/drive\.google\.com\/open\?id=([^&]+)/) ||
     u.match(/[?&]id=([^&]+)/);
 
-  if (m && m[1]) {
-    const id = m[1];
-    // URL más fiable para <img>
-    return `https://lh3.googleusercontent.com/d/${id}`;
-  }
-
-  // Si ya viene como googleusercontent
-  if (u.includes("googleusercontent.com")) return u;
-
-  return u;
+  return m && m[1] ? m[1] : "";
 }
 
+/* Convierte enlaces de Drive a enlace directo (lh3) */
+function driveToDirect(url) {
+  const u = String(url || "").trim();
+  if (!u) return "";
+
+  const id = extractDriveId(u);
+  if (id) return `https://lh3.googleusercontent.com/d/${id}`;
+
+  if (u.includes("googleusercontent.com")) return u; // ya es directo
+  return u; // otras URLs
+}
+
+/*
+ * Fallback para hotlink bloqueado:
+ * si Google bloquea la imagen embebida, usamos un proxy ligero.
+ * (Sigue siendo gratis; solo lo usa si hace falta.)
+ */
+function viaImageProxy(url) {
+  // images.weserv.nl: proxy de imágenes muy usado para hotlinking
+  // Nota: requiere URL codificada.
+  const enc = encodeURIComponent(url);
+  return `https://images.weserv.nl/?url=${enc}`;
+}
 
 /* Obtiene imágenes desde la columna "Fotos" (o similares) */
 function getImagesFromRow(o) {
@@ -74,13 +87,11 @@ function getImagesFromRow(o) {
 
 /* Obtiene valores aunque el encabezado cambie */
 function pickLoose(obj, patterns) {
-  // Exactos
   for (const p of patterns) {
     if (typeof p === "string" && obj[p] !== undefined && String(obj[p]).trim() !== "") {
       return obj[p];
     }
   }
-  // Flexibles (regex)
   const keys = Object.keys(obj);
   for (const pat of patterns) {
     if (!(pat instanceof RegExp)) continue;
@@ -106,12 +117,7 @@ let allListings = [];
  * RENDER TARJETA
  *************************************************/
 function card(o) {
-  const titulo = pickLoose(o, [
-    "titulo",
-    "Título del anuncio",
-    /t[ií]tulo/
-  ]);
-
+  const titulo = pickLoose(o, ["titulo", "Título del anuncio", /t[ií]tulo/]);
   const tipo = norm(pickLoose(o, ["tipo", "Tipo de oferta"]));
   const estado = pickLoose(o, ["estado", "Estado"]);
   const desc = pickLoose(o, ["descripcion", "Descripción de la vivienda", /descrip/]);
@@ -142,12 +148,22 @@ function card(o) {
 
   const wa = tel ? `https://wa.me/${String(tel).replace(/\D/g, "")}` : "";
   const mailto = email
-    ? `mailto:${email}?subject=${encodeURIComponent("Vivienda en Orea: " + titulo)}`
+    ? `mailto:${email}?subject=${encodeURIComponent("Vivienda en Orea: " + (titulo || ""))}`
     : "";
+
+  // Si es Drive, la versión directa puede ser bloqueada: ponemos fallback con onerror
+  const imgHtml = img
+    ? `<img class="hero-img"
+            src="${img}"
+            alt="${titulo || "Vivienda en Orea"}"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+            onerror="this.onerror=null; this.src='${viaImageProxy(img)}';" />`
+    : ``;
 
   return `
     <article class="card">
-${img ? `<img class="hero-img" src="${img}" alt="${titulo || "Vivienda en Orea"}" loading="lazy" referrerpolicy="no-referrer">` : ``}
+      ${imgHtml}
 
       <div class="badges">
         ${tipo ? `<span class="badge tipo">${tipo}</span>` : ``}
@@ -157,77 +173,4 @@ ${img ? `<img class="hero-img" src="${img}" alt="${titulo || "Vivienda en Orea"}
       <h3 class="title">${titulo || "Sin título"}</h3>
       ${priceStr ? `<p class="price">${priceStr}</p>` : ``}
       ${meta1 ? `<p class="meta">${meta1}</p>` : ``}
-      ${dir ? `<p class="meta2">${dir}</p>` : ``}
-
-      ${desc ? `<p class="desc">${desc}</p>` : ``}
-
-      <div class="actions">
-        ${wa ? `<a class="btn primary" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ``}
-        ${mailto ? `<a class="btn" href="${mailto}">Email</a>` : ``}
-        ${nombre ? `<span class="btn">${nombre}</span>` : ``}
-      </div>
-    </article>
-  `;
-}
-
-/*************************************************
- * FILTROS
- *************************************************/
-function applyFilters() {
-  const q = norm(elQ.value);
-  const tipo = norm(elTipo.value);
-  const solo = elSolo.checked;
-
-  const filtered = allListings.filter(o => {
-    const texto =
-      norm(pickLoose(o, ["titulo", /t[ií]tulo/])) +
-      " " +
-      norm(pickLoose(o, ["descripcion", /descrip/])) +
-      " " +
-      norm(pickLoose(o, ["direccion_sin_numero", /direc/]));
-
-    const okQ = !q || texto.includes(q);
-    const okTipo = !tipo || norm(pickLoose(o, ["tipo", "Tipo de oferta"])) === tipo;
-    const okEstado = !solo || norm(pickLoose(o, ["estado", "Estado"])) === "disponible";
-
-    return okQ && okTipo && okEstado;
-  });
-
-  elGrid.innerHTML = filtered.map(card).join("");
-  elStatus.textContent = filtered.length
-    ? `Mostrando ${filtered.length} anuncio(s).`
-    : "No hay anuncios que coincidan con el filtro.";
-}
-
-/*************************************************
- * CARGA DATOS
- *************************************************/
-async function load() {
-  elStatus.textContent = "Cargando anuncios…";
-  elGrid.innerHTML = "";
-
-  const res = await fetch(API_URL, { cache: "no-store" });
-  if (!res.ok) throw new Error("No se pudo cargar el API.");
-
-  const data = await res.json();
-  allListings = Array.isArray(data.listings) ? data.listings.slice().reverse() : [];
-
-  applyFilters();
-}
-
-/*************************************************
- * EVENTOS
- *************************************************/
-elQ.addEventListener("input", applyFilters);
-elTipo.addEventListener("change", applyFilters);
-elSolo.addEventListener("change", applyFilters);
-elRefresh.addEventListener("click", () =>
-  load().catch(err => (elStatus.textContent = err.message))
-);
-
-load().catch(err => (elStatus.textContent = err.message));
-
-
-
-
-
+      ${dir ? `
