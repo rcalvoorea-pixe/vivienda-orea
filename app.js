@@ -82,8 +82,8 @@ function card(o) {
   const tel = pick(o, ["contacto_telefono", "Teléfono de contacto", "Teléfono"]);
   const email = pick(o, ["contacto_email", "Correo electrónico", "Email"]);
 
-const images = Array.isArray(o.imagenes) ? o.imagenes : [];
-const img = driveToDirect(images[0] || "");
+  const images = Array.isArray(o.imagenes) ? o.imagenes : [];
+  const img = driveToDirect(images[0] || "");
 
 
   const meta1 = [
@@ -165,6 +165,7 @@ elSolo.addEventListener("change", applyFilters);
 elRefresh.addEventListener("click", () => load().catch(err => elStatus.textContent = err.message));
 
 load().catch(err => elStatus.textContent = err.message);
+
 
 
 
