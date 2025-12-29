@@ -3,16 +3,9 @@ const API_URL =
 
 const elGrid = document.getElementById("grid");
 const elStatus = document.getElementById("status");
-const elQ = document.getElementById("q");
-const elTipo = document.getElementById("tipo");
-const elSolo = document.getElementById("soloDisponibles");
 const elRefresh = document.getElementById("refresh");
 
 let allListings = [];
-
-function norm(v) {
-  return (v ?? "").toString().trim().toLowerCase();
-}
 
 function fmtPrice(p, moneda = "EUR") {
   const n = Number(String(p).replace(",", "."));
@@ -43,6 +36,19 @@ function viaImageProxy(url) {
   return `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
 }
 
+function pickLoose(obj, patterns) {
+  for (const p of patterns) {
+    if (typeof p === "string" && obj[p] !== undefined && String(obj[p]).trim() !== "") return obj[p];
+  }
+  const keys = Object.keys(obj);
+  for (const pat of patterns) {
+    if (!(pat instanceof RegExp)) continue;
+    const k = keys.find(key => pat.test(key.trim().toLowerCase()));
+    if (k && String(obj[k]).trim() !== "") return obj[k];
+  }
+  return "";
+}
+
 function getImagesFromRow(o) {
   let raw = "";
   if (o["Fotos"]) raw = String(o["Fotos"] || "");
@@ -60,17 +66,12 @@ function getImagesFromRow(o) {
     .filter(Boolean);
 }
 
-function pickLoose(obj, patterns) {
-  for (const p of patterns) {
-    if (typeof p === "string" && obj[p] !== undefined && String(obj[p]).trim() !== "") return obj[p];
-  }
-  const keys = Object.keys(obj);
-  for (const pat of patterns) {
-    if (!(pat instanceof RegExp)) continue;
-    const k = keys.find(key => pat.test(key.trim().toLowerCase()));
-    if (k && String(obj[k]).trim() !== "") return obj[k];
-  }
-  return "";
+function formatTipo(tipoRaw) {
+  const t = String(tipoRaw || "").trim().toLowerCase();
+  if (t.includes("tempor")) return "Alquiler de temporada";
+  if (t.includes("alquil")) return "Alquiler";
+  if (t.includes("venta")) return "Venta";
+  return tipoRaw ? String(tipoRaw).trim() : "";
 }
 
 /* JSONP loader (evita CORS) */
@@ -107,7 +108,9 @@ function loadJSONP() {
 
 function card(o) {
   const titulo = pickLoose(o, ["titulo", "Título del anuncio", /t[ií]tulo/]);
-  const tipo = norm(pickLoose(o, ["tipo", "Tipo de oferta"]));
+  const tipoRaw = pickLoose(o, ["tipo", "Tipo de oferta", /tipo/]);
+  const tipo = formatTipo(tipoRaw);
+
   const estado = pickLoose(o, ["estado", "Estado"]);
   const desc = pickLoose(o, ["descripcion", "Descripción de la vivienda", /descrip/]);
 
@@ -117,6 +120,7 @@ function card(o) {
   const hab = pickLoose(o, ["habitaciones", /habit/]);
   const banos = pickLoose(o, ["banos", "baños", /bañ/]);
   const m2 = pickLoose(o, ["m2", "Metros cuadrados aproximados", /metro/]);
+
   const dir = pickLoose(o, ["direccion_sin_numero", "Dirección (sin número)", /direc/]);
 
   const tel = pickLoose(o, ["contacto_telefono", "Teléfono de contacto", /tel/]);
@@ -167,25 +171,11 @@ function card(o) {
   `;
 }
 
-function applyFilters() {
-  const q = norm(elQ.value);
-  const tipo = norm(elTipo.value);
-  const solo = elSolo.checked;
-
-  const filtered = allListings.filter(o => {
-    const texto =
-      norm(pickLoose(o, ["titulo", /t[ií]tulo/])) + " " +
-      norm(pickLoose(o, ["descripcion", /descrip/])) + " " +
-      norm(pickLoose(o, ["direccion_sin_numero", /direc/]));
-
-    const okQ = !q || texto.includes(q);
-    const okTipo = !tipo || norm(pickLoose(o, ["tipo", "Tipo de oferta"])) === tipo;
-    const okEstado = !solo || norm(pickLoose(o, ["estado", "Estado"])) === "disponible";
-    return okQ && okTipo && okEstado;
-  });
-
-  elGrid.innerHTML = filtered.map(card).join("");
-  elStatus.textContent = filtered.length ? `Mostrando ${filtered.length} anuncio(s).` : "No hay anuncios que coincidan con el filtro.";
+function render() {
+  elGrid.innerHTML = allListings.map(card).join("");
+  elStatus.textContent = allListings.length
+    ? `Mostrando ${allListings.length} anuncio(s).`
+    : "No hay anuncios publicados.";
 }
 
 async function load() {
@@ -195,16 +185,12 @@ async function load() {
   try {
     const data = await loadJSONP();
     allListings = Array.isArray(data.listings) ? data.listings.slice().reverse() : [];
-    applyFilters();
+    render();
   } catch (e) {
     console.error(e);
     elStatus.textContent = `Error cargando anuncios: ${e.message}`;
   }
 }
 
-elQ.addEventListener("input", applyFilters);
-elTipo.addEventListener("change", applyFilters);
-elSolo.addEventListener("change", applyFilters);
 elRefresh.addEventListener("click", load);
-
 load();
