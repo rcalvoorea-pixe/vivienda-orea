@@ -27,8 +27,29 @@ function pick(obj, candidates) {
   return "";
 }
 
+function pickLoose(obj, patterns) {
+  // 1) intenta claves exactas (por si acaso)
+  for (const p of patterns) {
+    if (typeof p === "string" && obj[p] !== undefined && String(obj[p]).trim() !== "") return obj[p];
+  }
+  // 2) intenta por coincidencia “flexible” en nombres de columnas
+  const keys = Object.keys(obj);
+  for (const pat of patterns) {
+    const re = pat instanceof RegExp ? pat : null;
+    if (!re) continue;
+    const k = keys.find(key => re.test(key.trim().toLowerCase()));
+    if (k && String(obj[k]).trim() !== "") return obj[k];
+  }
+  return "";
+}
+
 function card(o) {
-  const titulo = pick(o, ["titulo", "Título del Anuncio", "Título"]);
+  const titulo = pickLoose(o, [
+  "titulo",
+  "Título del anuncio",
+  /t[ií]tulo.*anuncio/,
+  /^t[ií]tulo$/
+]);
   const tipo = norm(pick(o, ["tipo", "Tipo de oferta"]));
   const desc = pick(o, ["descripcion", "Descripción de la vivienda", "Descripción"]);
   const precio = pick(o, ["precio", "Precio"]);
@@ -125,4 +146,5 @@ elSolo.addEventListener("change", applyFilters);
 elRefresh.addEventListener("click", () => load().catch(err => elStatus.textContent = err.message));
 
 load().catch(err => elStatus.textContent = err.message);
+
 
