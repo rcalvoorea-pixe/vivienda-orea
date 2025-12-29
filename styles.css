@@ -92,16 +92,15 @@ body{ margin:0; background: var(--bg); color: var(--ink); }
 
 /* Controls */
 .controls{
-  display:grid;
-  grid-template-columns: 1fr 220px 180px 140px;
-  gap: 10px;
+  display:flex;
+  justify-content:flex-end;
   align-items:center;
-  padding: 12px;
-  background: rgba(255,255,255,.7);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 8px 18px rgba(10, 20, 40, .06);
+  padding: 8px 0 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
+
 .controls input, .controls select, .controls button{
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -198,4 +197,5 @@ a.btn:hover{ transform: translateY(-1px); }
 @media (max-width: 620px){
   .grid{ grid-template-columns: 1fr; }
 }
+
 
