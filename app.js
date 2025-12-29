@@ -46,7 +46,7 @@ function pickLoose(obj, patterns) {
 function card(o) {
   const titulo = pickLoose(o, [
   "titulo",
-  "Título del anuncio",
+  "Título del Anuncio",
   /t[ií]tulo.*anuncio/,
   /^t[ií]tulo$/
 ]);
@@ -146,5 +146,6 @@ elSolo.addEventListener("change", applyFilters);
 elRefresh.addEventListener("click", () => load().catch(err => elStatus.textContent = err.message));
 
 load().catch(err => elStatus.textContent = err.message);
+
 
 
