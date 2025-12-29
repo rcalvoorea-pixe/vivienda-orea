@@ -43,8 +43,6 @@ function driveToDirect(url) {
   return u;
 }
 
-}
-
 
 /* Obtiene imágenes desde la columna "Fotos" (o similares) */
 function getImagesFromRow(o) {
@@ -228,6 +226,7 @@ elRefresh.addEventListener("click", () =>
 );
 
 load().catch(err => (elStatus.textContent = err.message));
+
 
 
 
