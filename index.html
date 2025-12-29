@@ -7,15 +7,29 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="wrap">
-    <h1>Ofertas de vivienda en Orea</h1>
-    <p class="sub">Tablón municipal de alquiler · venta · temporada</p>
-    
-<a href="https://docs.google.com/forms/d/e/1FAIpQLSfWBUYSzDnqoIoFoL8plNHSfrV8ZnWep6hZ6NWZ69l12DSjLg/viewform?usp=header"
-   target="_blank"
-   class="btn-form">
-   Publicar una oferta de vivienda
-</a>
+<header class="site-header">
+  <div class="wrap topbar">
+    <div class="brand">
+      <img class="brand-logo" src="assets/Escudo_de_Orea.svg.png" alt="Ayuntamiento de Orea" />
+      <div class="brand-text">
+        <div class="brand-kicker">Ayuntamiento de Orea</div>
+        <div class="brand-title">Ofertas de vivienda</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <a class="cta" href="https://docs.google.com/forms/d/e/1FAIpQLSfWBUYSzDnqoIoFoL8plNHSfrV8ZnWep6hZ6NWZ69l12DSjLg/viewform?usp=header" target="_blank" rel="noopener">
+        + Publicar una oferta
+        <span class="cta-sub">Formulario público (2 min)</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="wrap hero">
+    <p class="hero-text">
+      Tablón municipal para <strong>alquiler</strong>, <strong>venta</strong> y <strong>temporada</strong>.
+      Las ofertas se revisan antes de publicarse.
+    </p>
 
     <div class="controls">
       <input id="q" type="search" placeholder="Buscar (título, descripción, dirección…)" />
@@ -29,9 +43,11 @@
         <input id="soloDisponibles" type="checkbox" checked />
         Solo disponibles
       </label>
-      <button id="refresh">Actualizar</button>
+      <button id="refresh" class="btn-secondary">Actualizar</button>
     </div>
-  </header>
+  </div>
+</header>
+
 
   <main class="wrap">
     <div id="status" class="status">Cargando anuncios…</div>
@@ -48,5 +64,6 @@ El Ayuntamiento no interviene en las condiciones entre las partes.
   <script src="app.js"></script>
 </body>
 </html>
+
 
 
