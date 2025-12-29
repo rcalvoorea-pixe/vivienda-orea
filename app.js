@@ -153,13 +153,14 @@ function card(o) {
 
   // Si es Drive, la versión directa puede ser bloqueada: ponemos fallback con onerror
   const imgHtml = img
-    ? `<img class="hero-img"
-            src="${img}"
-            alt="${titulo || "Vivienda en Orea"}"
-            loading="lazy"
-            referrerpolicy="no-referrer"
-            onerror="this.onerror=null; this.src='${viaImageProxy(img)}';" />`
-    : ``;
+    ${img ? `<img class="hero-img"
+  src="${img}"
+  alt="${titulo || "Vivienda en Orea"}"
+  loading="lazy"
+  referrerpolicy="no-referrer"
+  onerror="this.onerror=null; this.src='https://images.weserv.nl/?url=${encodeURIComponent(img)}';"
+>` : ``}
+
 
   return `
     <article class="card">
@@ -174,3 +175,4 @@ function card(o) {
       ${priceStr ? `<p class="price">${priceStr}</p>` : ``}
       ${meta1 ? `<p class="meta">${meta1}</p>` : ``}
       ${dir ? `
+
