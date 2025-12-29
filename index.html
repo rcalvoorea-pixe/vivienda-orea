@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vivienda en Orea</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="wrap">
+    <h1>Ofertas de vivienda en Orea</h1>
+    <p class="sub">Tablón municipal de alquiler · venta · temporada</p>
+
+    <div class="controls">
+      <input id="q" type="search" placeholder="Buscar (título, descripción, dirección…)" />
+      <select id="tipo">
+        <option value="">Todos los tipos</option>
+        <option value="alquiler">Alquiler</option>
+        <option value="venta">Venta</option>
+        <option value="temporada">Temporada</option>
+      </select>
+      <label class="check">
+        <input id="soloDisponibles" type="checkbox" checked />
+        Solo disponibles
+      </label>
+      <button id="refresh">Actualizar</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div id="status" class="status">Cargando anuncios…</div>
+    <section id="grid" class="grid"></section>
+  </main>
+
+  <footer class="wrap footer">
+    <small>
+      © Ayuntamiento de Orea · Publicación informativa. Verifica condiciones con el anunciante.
+    </small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
