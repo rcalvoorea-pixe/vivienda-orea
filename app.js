@@ -25,19 +25,25 @@ function driveToDirect(url) {
   const u = String(url || "").trim();
   if (!u) return "";
 
-  // drive.google.com/file/d/ID/view
-  let m = u.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-  if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+  // Captura IDs en varios formatos de Drive
+  let m =
+    u.match(/drive\.google\.com\/file\/d\/([^/]+)/) ||
+    u.match(/drive\.google\.com\/open\?id=([^&]+)/) ||
+    u.match(/[?&]id=([^&]+)/);
 
-  // drive.google.com/open?id=ID
-  m = u.match(/drive\.google\.com\/open\?id=([^&]+)/);
-  if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+  if (m && m[1]) {
+    const id = m[1];
+    // Formato más fiable para <img> cuando el archivo es una imagen
+    return `https://lh3.googleusercontent.com/d/${id}`;
+  }
 
-  // ya es uc
-  if (u.includes("drive.google.com/uc")) return u;
+  // Si ya viene en googleusercontent, lo dejamos
+  if (u.includes("googleusercontent.com")) return u;
 
+  // Otras URLs (no Drive)
   return u;
 }
+
 
 /* Obtiene imágenes desde la columna "Fotos" (o similares) */
 function getImagesFromRow(o) {
@@ -221,3 +227,4 @@ elRefresh.addEventListener("click", () =>
 );
 
 load().catch(err => (elStatus.textContent = err.message));
+
