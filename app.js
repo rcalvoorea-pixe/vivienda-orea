@@ -148,7 +148,7 @@ function card(o) {
 
   return `
     <article class="card">
-      ${img ? `<img class="hero-img" src="${img}" alt="${titulo || "Vivienda en Orea"}">` : ``}
+${img ? `<img class="hero-img" src="${img}" alt="${titulo || "Vivienda en Orea"}" loading="lazy" referrerpolicy="no-referrer">` : ``}
 
       <div class="badges">
         ${tipo ? `<span class="badge tipo">${tipo}</span>` : ``}
@@ -227,4 +227,5 @@ elRefresh.addEventListener("click", () =>
 );
 
 load().catch(err => (elStatus.textContent = err.message));
+
 
