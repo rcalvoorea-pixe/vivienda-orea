@@ -42,6 +42,24 @@ function pickLoose(obj, patterns) {
   }
   return "";
 }
+function driveToDirect(url) {
+  const u = String(url || "").trim();
+  if (!u) return "";
+
+  // file/d/ID/view
+  let m = u.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+
+  // open?id=ID
+  m = u.match(/drive\.google\.com\/open\?id=([^&]+)/);
+  if (m && m[1]) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+
+  // uc?id=ID o uc?export=...
+  if (u.includes("drive.google.com/uc")) return u;
+
+  return u; // si no es Drive, lo dejamos tal cual
+}
+
 
 function card(o) {
   const titulo = pickLoose(o, [
@@ -64,8 +82,9 @@ function card(o) {
   const tel = pick(o, ["contacto_telefono", "Teléfono de contacto", "Teléfono"]);
   const email = pick(o, ["contacto_email", "Correo electrónico", "Email"]);
 
-  const images = Array.isArray(o.imagenes) ? o.imagenes : [];
-  const img = images[0] || "";
+const images = Array.isArray(o.imagenes) ? o.imagenes : [];
+const img = driveToDirect(images[0] || "");
+
 
   const meta1 = [
     hab ? `${hab} hab` : "",
@@ -146,6 +165,7 @@ elSolo.addEventListener("change", applyFilters);
 elRefresh.addEventListener("click", () => load().catch(err => elStatus.textContent = err.message));
 
 load().catch(err => elStatus.textContent = err.message);
+
 
 
 
