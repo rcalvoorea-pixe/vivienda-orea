@@ -25,23 +25,24 @@ function driveToDirect(url) {
   const u = String(url || "").trim();
   if (!u) return "";
 
-  // Captura IDs en varios formatos de Drive
-  let m =
+  // Captura el ID de Drive desde varios formatos
+  const m =
     u.match(/drive\.google\.com\/file\/d\/([^/]+)/) ||
     u.match(/drive\.google\.com\/open\?id=([^&]+)/) ||
     u.match(/[?&]id=([^&]+)/);
 
   if (m && m[1]) {
     const id = m[1];
-    // Formato más fiable para <img> cuando el archivo es una imagen
+    // URL más fiable para <img>
     return `https://lh3.googleusercontent.com/d/${id}`;
   }
 
-  // Si ya viene en googleusercontent, lo dejamos
+  // Si ya viene como googleusercontent
   if (u.includes("googleusercontent.com")) return u;
 
-  // Otras URLs (no Drive)
   return u;
+}
+
 }
 
 
@@ -227,5 +228,6 @@ elRefresh.addEventListener("click", () =>
 );
 
 load().catch(err => (elStatus.textContent = err.message));
+
 
 
