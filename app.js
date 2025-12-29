@@ -28,7 +28,7 @@ function pick(obj, candidates) {
 }
 
 function card(o) {
-  const titulo = pick(o, ["titulo", "Título del anuncio", "Título"]);
+  const titulo = pick(o, ["titulo", "Título del Anuncio", "Título"]);
   const tipo = norm(pick(o, ["tipo", "Tipo de oferta"]));
   const desc = pick(o, ["descripcion", "Descripción de la vivienda", "Descripción"]);
   const precio = pick(o, ["precio", "Precio"]);
@@ -125,3 +125,4 @@ elSolo.addEventListener("change", applyFilters);
 elRefresh.addEventListener("click", () => load().catch(err => elStatus.textContent = err.message));
 
 load().catch(err => elStatus.textContent = err.message);
+
