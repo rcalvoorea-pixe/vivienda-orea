@@ -62,16 +62,28 @@ function driveToDirect(url) {
 }
 
 function getImagesFromRow(o) {
-  // 1) Si el API ya trae o.imagenes, lo usamos
+  // 1) Si existe o.imagenes y tiene algo, úsalo
   if (Array.isArray(o.imagenes) && o.imagenes.length) {
     return o.imagenes.map(driveToDirect).filter(Boolean);
   }
 
-  // 2) Si no, intentamos buscar una columna tipo "Enlaces a fotografías"
-  const key = Object.keys(o).find(k => k.trim().toLowerCase().includes("fotograf"));
-  const raw = key ? String(o[key] || "") : "";
+  // 2) Prioridad explícita: columna "Fotos"
+  let raw = "";
+  if (o["Fotos"]) raw = String(o["Fotos"] || "");
+
+  // 3) Si no, busca cualquier campo que parezca de imágenes
+  if (!raw) {
+    const keys = Object.keys(o);
+    const k = keys.find(key => {
+      const t = key.trim().toLowerCase();
+      return t === "fotos" || t.includes("foto") || t.includes("imagen") || t.includes("fotograf");
+    });
+    raw = k ? String(o[k] || "") : "";
+  }
+
+  // 4) Separa por comas o saltos de línea
   return raw
-    .split(",")
+    .split(/[\n,]+/)
     .map(s => driveToDirect(s.trim()))
     .filter(Boolean);
 }
@@ -183,6 +195,7 @@ elSolo.addEventListener("change", applyFilters);
 elRefresh.addEventListener("click", () => load().catch(err => elStatus.textContent = err.message));
 
 load().catch(err => elStatus.textContent = err.message);
+
 
 
 
