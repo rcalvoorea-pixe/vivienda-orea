@@ -107,9 +107,25 @@ function loadJSONP() {
 }
 
 function card(o) {
+  function tipoLabel(tipoRaw) {
+  const t = String(tipoRaw || "").trim().toLowerCase();
+  if (t.includes("tempor")) return "Alquiler de temporada";
+  if (t.includes("alquil")) return "Alquiler";
+  if (t.includes("venta")) return "Venta";
+  return String(tipoRaw || "").trim();
+}
+
+function tipoClass(tipoRaw) {
+  const t = String(tipoRaw || "").trim().toLowerCase();
+  if (t.includes("tempor")) return "tipo-temporada";
+  if (t.includes("alquil")) return "tipo-alquiler";
+  if (t.includes("venta")) return "tipo-venta";
+  return "tipo-otro";
+}
+
   const titulo = pickLoose(o, ["titulo", "Título del anuncio", /t[ií]tulo/]);
   const tipoRaw = pickLoose(o, ["tipo", "Tipo de oferta", /tipo/]);
-  const tipo = formatTipo(tipoRaw);
+  const tipo = tipoLabel(tipoRaw);
 
   const estado = pickLoose(o, ["estado", "Estado"]);
   const desc = pickLoose(o, ["descripcion", "Descripción de la vivienda", /descrip/]);
@@ -152,7 +168,7 @@ function card(o) {
       ${imgHtml}
 
       <div class="badges">
-        ${tipo ? `<span class="badge tipo">${tipo}</span>` : ``}
+        ${tipo ? `<span class="badge tipo ${tipoClass(tipoRaw)}">${tipo}</span>` : ``}
         ${estado ? `<span class="badge estado">${estado}</span>` : ``}
       </div>
 
@@ -194,3 +210,4 @@ async function load() {
 
 elRefresh.addEventListener("click", load);
 load();
+
