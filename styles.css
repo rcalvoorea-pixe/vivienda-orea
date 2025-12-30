@@ -215,5 +215,40 @@ a.btn:hover{ transform: translateY(-1px); }
 @media (max-width: 980px){
   .subscribe{ flex-direction: column; align-items:flex-start; }
 }
+/* Tipos de oferta: colores distintos */
+.badge.tipo{
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+/* Venta */
+.badge.tipo-venta{
+  background: rgba(30, 64, 175, .12);
+  border: 1px solid rgba(30, 64, 175, .25);
+  color: rgb(30, 64, 175);
+}
+
+/* Alquiler */
+.badge.tipo-alquiler{
+  background: rgba(22, 163, 74, .12);
+  border: 1px solid rgba(22, 163, 74, .25);
+  color: rgb(22, 163, 74);
+}
+
+/* Alquiler de temporada */
+.badge.tipo-temporada{
+  background: rgba(217, 119, 6, .14);
+  border: 1px solid rgba(217, 119, 6, .28);
+  color: rgb(180, 83, 9);
+}
+
+/* Por si aparece otro texto */
+.badge.tipo-otro{
+  background: rgba(100, 116, 139, .12);
+  border: 1px solid rgba(100, 116, 139, .25);
+  color: rgb(71, 85, 105);
+}
+
+
 
 
